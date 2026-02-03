@@ -1,0 +1,6 @@
+# Python build & test artifacts
+test-reports/
+dist/
+build/
+__pycache__/
+*.pyc
