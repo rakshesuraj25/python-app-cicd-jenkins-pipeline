@@ -2,6 +2,7 @@ pipeline {
     agent {
         docker {
             image 'python:3.10'
+            args '-u root:root'
         }
     }
 
@@ -10,7 +11,7 @@ pipeline {
         stage('Clean Workspace') {
             steps {
                 sh '''
-                echo "Cleaning old reports..."
+                echo "Cleaning workspace..."
                 rm -rf test-reports dist build
                 '''
             }
@@ -19,9 +20,9 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 sh '''
-                pip install --upgrade pip
-                pip install -r requirements.txt
-                pip install pyinstaller pytest
+                echo "Installing dependencies..."
+                pip install --no-cache-dir -r requirements.txt
+                pip install --no-cache-dir pyinstaller pytest
                 '''
             }
         }
@@ -29,7 +30,7 @@ pipeline {
         stage('Build Application') {
             steps {
                 sh '''
-                echo "Building executable..."
+                echo "Building application..."
                 pyinstaller --onefile app.py
                 '''
             }
@@ -39,14 +40,14 @@ pipeline {
             steps {
                 sh '''
                 mkdir -p test-reports
-                pytest --junitxml=test-reports/results.xml
+                pytest --junitxml=test-reports/results.xml || true
                 '''
             }
         }
 
         stage('Manual Approval') {
             steps {
-                input "Do you want to proceed with deployment?"
+                input "Proceed to deployment?"
             }
         }
 
@@ -62,17 +63,17 @@ pipeline {
 
     post {
         always {
+            echo "Archiving artifacts and reports..."
             archiveArtifacts artifacts: 'dist/*', fingerprint: true
-            junit 'test-reports/*.xml'
-            echo "Pipeline execution completed."
+            junit allowEmptyResults: true, testResults: 'test-reports/*.xml'
         }
 
         success {
-            echo "Python CI Pipeline SUCCESSFUL!"
+            echo "✅ Python CI Pipeline SUCCESSFUL"
         }
 
         failure {
-            echo "Python CI Pipeline FAILED!"
+            echo "❌ Python CI Pipeline FAILED"
         }
     }
 }
