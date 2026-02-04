@@ -1,81 +1,83 @@
-from flask import Flask,render_template
+from flask import Flask, render_template
 
-app = Flask (__name__)
+app = Flask(__name__)
 
-# sum of digits of a number until it becomes one!
-
-def num2digit(sum):
+# Reduce a number to single digit
+def num_to_digit(value):
     temp = 0
-    while sum > 0:
-        temp = temp + sum%10
-        sum = sum//10
-    if temp>9:
-        return num2digit(temp)
-    else:
-        return temp
+    while value > 0:
+        temp += value % 10
+        value //= 10
+    if temp > 9:
+        return num_to_digit(temp)
+    return temp
 
-# simple function to count the sum of the alphabets in a word
 
-def numerology(name): 
-    sum=0
-    for i in range(len(name)):      
-        if name[i] in ['a','r','s']:
-            sum+=1
-        elif name[i] in ['b','q','t']:
-            sum+=2
-        elif name[i] in ['c','p','u']:
-            sum+=3
-        elif name[i] in ['d','o','v']:
-            sum+=4
-        elif name[i] in ['e','n','w']:
-            sum+=5
-        elif name[i] in ['f','m','x']:
-            sum+=6
-        elif name[i] in ['g','l','y']:
-            sum+=7
-        elif name[i] in ['h','k','z']:
-            sum+=8
-        elif name[i] in ['i','j']:
-            sum+=9
+# Numerology logic
+def numerology(name):
+    total = 0
+    for ch in name:
+        if ch in ['a', 'r', 's']:
+            total += 1
+        elif ch in ['b', 'q', 't']:
+            total += 2
+        elif ch in ['c', 'p', 'u']:
+            total += 3
+        elif ch in ['d', 'o', 'v']:
+            total += 4
+        elif ch in ['e', 'n', 'w']:
+            total += 5
+        elif ch in ['f', 'm', 'x']:
+            total += 6
+        elif ch in ['g', 'l', 'y']:
+            total += 7
+        elif ch in ['h', 'k', 'z']:
+            total += 8
+        elif ch in ['i', 'j']:
+            total += 9
         else:
-            sum = -9999
-    if sum > 0:
-        sum = num2digit(sum)
+            return "Invalid characters detected!"
 
-    # Giving some random messages for a digit
+    digit = num_to_digit(total)
 
-    if (sum==1):
-        message = "You are a sad person"
-    elif (sum==2):
-        message = "You are an angry person"
-    elif (sum==3):
-        message = "An introvert"
-    elif (sum==4):
-        message = "You have a golly nature"
-    elif (sum==5):
-        message = "You like to party"
-    elif (sum==6):
-        message = "Your revenge is bitter"
-    elif (sum==7):
-        message = "A nerd"
-    elif (sum==8):
-        message = "too much attitude"
-    elif (sum==9):
-        message = "you are a shy person"
-    else:
-        message = "I know who you are. THE ROBOT :P"
-    return message
+    messages = {
+        1: "You are a sad person",
+        2: "You are an angry person",
+        3: "An introvert",
+        4: "You have a jolly nature",
+        5: "You like to party",
+        6: "Your revenge is bitter",
+        7: "A nerd",
+        8: "Too much attitude",
+        9: "You are a shy person"
+    }
+
+    return messages.get(digit, "I know who you are. THE ROBOT :P")
 
 
-@app.route('/')  # main page
-def hello():
-    return render_template('index.html',message="hello dear, Lets have some fun!!",imgname="hello")
+@app.route('/')
+def home():
+    return render_template(
+        'index.html',
+        message="Hello dear, let's have some fun!",
+        imgname="hello"
+    )
 
-@app.route('/<username>') # dynamic route
-def hello_user(username):
-    username=username.lower()
+
+@app.route('/<username>')
+def user_profile(username):
+    username = username.lower()
     result = numerology(username)
-    return render_template('index.html',message=username+": "+result,imgname="jenkins")
+    return render_template(
+        'index.html',
+        message=f"{username}: {result}",
+        imgname="jenkins"
+    )
+
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(
+        host='0.0.0.0',
+        port=5000,
+        debug=False
+    )
