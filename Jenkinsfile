@@ -54,8 +54,8 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh '''
-                echo "Running application..."
-                python app.py
+                echo "Validating application in CI mode..."
+                JENKINS_RUN=true python app.py
                 '''
             }
         }
